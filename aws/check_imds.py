@@ -1,4 +1,5 @@
 import boto3
+import argparse
 
 def get_instance_ids(session, region):
     ec2_resource = session.resource('ec2', region_name=region)
@@ -20,13 +21,16 @@ def check_and_update_imds_version(ec2_client, instance_id_list):
         print(f'{vuln_instance_id} set to use IMDS v2')
 
 def main():
-    profile = '[profile_name]'
-    region = 'ap-northeast-2'
+    parser = argparse.ArgumentParser(description='Check and update IMDS version for EC2 instances.')
+    parser.add_argument('--profile', type=str, required=True, help='AWS profile name')
+    parser.add_argument('--region', type=str, required=True, help='AWS region')
 
-    session = boto3.Session(profile_name=profile)
-    ec2_client = session.client('ec2', region_name=region)
+    args = parser.parse_args()
 
-    instance_ids = get_instance_ids(session, region)
+    session = boto3.Session(profile_name=args.profile)
+    ec2_client = session.client('ec2', region_name=args.region)
+
+    instance_ids = get_instance_ids(session, args.region)
     check_and_update_imds_version(ec2_client, instance_ids)
 
 if __name__ == "__main__":
